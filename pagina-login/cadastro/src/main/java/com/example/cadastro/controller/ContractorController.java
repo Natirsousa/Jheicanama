@@ -1,10 +1,14 @@
 package com.example.cadastro.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,15 +39,41 @@ public class ContractorController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String email, @RequestParam String senha){
-        boolean valido = contractorService.validarlogin(email, senha);
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
+        String identificador = loginRequest.getIdentificador();
+        String senha = loginRequest.getSenha();
+        
+        boolean valido = contractorService.validarlogin(identificador, senha);
 
         if(valido){
-            Contractor user = contractorService.searchByEmail(email);
-            String token = jwtUtil.generateToken(user.getEmail());
-            return ResponseEntity.ok(token);
+            Contractor user = identificador.matches("\\d+") ?
+                contractorService.searchByCnpj(identificador) :
+                contractorService.searchByEmail(identificador);
+            String token = jwtUtil.generateToken(identificador);
+            return ResponseEntity.ok(Map.of(
+                    "token",token,
+                    "tipo", "contractor"
+                ));
+                
         }
 
         return ResponseEntity.status(401).body("Email/Cnpj ou senha incorreta");
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getUserData(@RequestHeader("Authorization") String token){
+        if(token.startsWith("Bearer ")){
+            token = token.substring(7);
+        }
+        if(!jwtUtil.validateToken(token)){
+            return ResponseEntity.status(401).body("Token inválido ou expirado");
+        }
+
+        String cnpj = jwtUtil.extractIdentifier(token);
+        cnpj = cnpj.replaceAll("[^\\d]", "");
+        Contractor user = contractorService.searchByCnpj(cnpj);
+
+        return ResponseEntity.ok(user);
+    }
+
 }

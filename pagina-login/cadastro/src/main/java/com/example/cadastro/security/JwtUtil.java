@@ -12,16 +12,17 @@ public class JwtUtil {
 
     private final long EXPIRATION_TIME = 60 * 60 * 1000;
 
-    public String generateToken(String cpf){
+    // Gera token com qualquer identificador (CPF, CNPJ ou email)
+    public String generateToken(String identifier){
         return Jwts.builder()
-            .setSubject(cpf)
+            .setSubject(identifier)
             .setIssuedAt(new Date())
             .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
             .signWith(key)
             .compact();
     }
 
-     public boolean validateToken(String token) {
+    public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key)
@@ -33,7 +34,8 @@ public class JwtUtil {
         }
     }
 
-    public String extractCpf(String token) {
+    // Extrai qualquer identificador do token
+    public String extractIdentifier(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
@@ -41,6 +43,4 @@ public class JwtUtil {
                 .getBody();
         return claims.getSubject();
     }
-    
 }
-

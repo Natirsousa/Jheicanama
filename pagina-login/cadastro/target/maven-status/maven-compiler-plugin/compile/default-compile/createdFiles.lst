@@ -1,10 +1,13 @@
+com\example\cadastro\service\CustomUserDetailsService.class
 com\example\cadastro\controller\ContractorController.class
 com\example\cadastro\security\SecurityConfig.class
 com\example\cadastro\model\Candidate.class
+com\example\cadastro\security\JwtAuthenticationFilter.class
 com\example\cadastro\service\UserService.class
 com\example\cadastro\repository\ContractorRepository.class
 com\example\cadastro\repository\UserRepository.class
 com\example\cadastro\model\User.class
+com\example\cadastro\controller\LoginRequest.class
 com\example\cadastro\model\Contractor.class
 com\example\cadastro\CadastroApplication.class
 com\example\cadastro\controller\AuthController.class

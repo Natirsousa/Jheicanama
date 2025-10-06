@@ -18,8 +18,11 @@ public class ContractorService {
     private PasswordEncoder passwordEnconder;
 
     public Contractor register(Contractor user){
-        if(contractorRepository.findByCnpj(user.getCnpj())!=null){
-            throw new RuntimeException("Cnpj já cadastrado!");
+       String cnpjLimpo = user.getCnpj().replaceAll("\\D", "");
+        user.setCnpj(cnpjLimpo);
+
+        if(contractorRepository.findByCnpj(cnpjLimpo) != null){
+            throw new RuntimeException("CNPJ já cadastrado!");
         }
         if(contractorRepository.findByEmail(user.getEmail())!=null){
             throw new RuntimeException("Email já cadastrado!");
@@ -34,12 +37,19 @@ public class ContractorService {
     }
 
     public Contractor searchByCnpj(String cnpj){
+         cnpj = cnpj.replaceAll("[^\\d]", "");
         return contractorRepository.findByCnpj(cnpj);
     }
 
-    public boolean validarlogin(String email, String senha){
-        Contractor user = contractorRepository.findByEmail(email);
+    public boolean validarlogin(String identificador, String senha){
+         Contractor user;
 
+        if(identificador.matches("\\d+")){ // é CNPJ
+            String cnpjLimpo = identificador.replaceAll("[^\\d]", "");
+            user = contractorRepository.findByCnpj(cnpjLimpo);
+        } else { // é email
+            user = contractorRepository.findByEmail(identificador);
+        }
         if(user == null){
             return false;
         }
